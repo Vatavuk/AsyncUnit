@@ -28,12 +28,12 @@ public class AsyncFlow
         throw new UnsupportedOperationException("#prepare");
     }
 
-    public static <T, R> Function<T, R> prepare(Function<T, R> function)
+    public static <T, R> Function<T, R> prepareFn(Function<T, R> function)
     {
         throw new UnsupportedOperationException("#prepare");
     }
 
-    public static <T, U, R> BiFunction<T, U, R> prepare(BiFunction<T, U, R> function)
+    public static <T, U, R> BiFunction<T, U, R> prepareFn(BiFunction<T, U, R> function)
     {
         throw new UnsupportedOperationException("#prepare");
     }
