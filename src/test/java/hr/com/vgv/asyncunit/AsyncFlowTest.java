@@ -9,9 +9,8 @@ import org.junit.Test;
 
 public class AsyncFlowTest
 {
-
     @Test
-    public void supportsAssertionsInSingleThread() throws Throwable
+    public void supportsAssertionsInSingleThread() throws Exception
     {
         AtomicBoolean flag = new AtomicBoolean(false);
 
@@ -28,7 +27,7 @@ public class AsyncFlowTest
     }
 
     @Test
-    public void supportsAssertionsInMultipleThreads() throws Throwable
+    public void supportsAssertionsInMultipleThreads() throws Exception
     {
         Queue<Long> queue = new ConcurrentLinkedDeque<>();
 
@@ -48,7 +47,7 @@ public class AsyncFlowTest
     }
 
     @Test(expected = AssertionError.class)
-    public void failsOnAssertionErrorInThread() throws Throwable
+    public void failsOnAssertionErrorInThread() throws Exception
     {
         new Thread(
             AsyncFlow.prepare((Runnable) Assert::fail)
@@ -58,7 +57,7 @@ public class AsyncFlowTest
     }
 
     @Test(expected = IllegalStateException.class)
-    public void failsOnExceptionThrownInThread() throws Throwable
+    public void failsOnExceptionThrownInThread() throws Exception
     {
         new Thread(
             (Runnable) AsyncFlow.prepare(() -> {
@@ -70,7 +69,7 @@ public class AsyncFlowTest
     }
 
     @Test(expected = InterruptedException.class)
-    public void failsOnThreadInterruption() throws Throwable
+    public void failsOnThreadInterruption() throws Exception
     {
         final Thread main = Thread.currentThread();
         new Thread(main::interrupt).start();

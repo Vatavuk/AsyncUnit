@@ -38,13 +38,15 @@ public class AsyncFlow
         throw new UnsupportedOperationException("#prepare");
     }
 
-    public static void await() throws Throwable
+    public static void await() throws InterruptedException
     {
+        //TODO: don't forget to clear cache in finally block
         throw new UnsupportedOperationException("#await");
     }
 
-    public static void await(long period) throws Throwable
+    public static void await(long period) throws InterruptedException
     {
+        //TODO: don't forget to clear cache in finally block
         throw new UnsupportedOperationException("#await");
     }
 }
