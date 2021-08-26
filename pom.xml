@@ -27,12 +27,6 @@ SOFTWARE.
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>com.jcabi</groupId>
-        <artifactId>parent</artifactId>
-        <version>0.52.1</version>
-    </parent>
-
     <groupId>hr.com.vgv.asyncunit</groupId>
     <artifactId>asyncunit</artifactId>
     <version>1.0-SNAPSHOT</version>
@@ -75,117 +69,18 @@ SOFTWARE.
     </build>
     <dependencies>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.12</version>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>5.7.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>5.7.2</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
-    <profiles>
-        <profile>
-            <id>qulice</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>com.qulice</groupId>
-                        <artifactId>qulice-maven-plugin</artifactId>
-                        <version>0.18.5</version>
-                        <configuration>
-                            <excludes combine.children="append">
-                                <exclude>checkstyle:/src/site/resources/.*</exclude>
-                                <exclude>findbugs:.*</exclude>
-                                <exclude>duplicatefinder:.*</exclude>
-                                <exclude>dependencies:javax.ws.rs:javax.ws.rs-api</exclude>
-                                <exclude>dependencies:org.glassfish.jersey.core:jersey-common</exclude>
-                            </excludes>
-                        </configuration>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.jacoco</groupId>
-                        <artifactId>jacoco-maven-plugin</artifactId>
-                        <version>0.8.0</version>
-                        <configuration>
-                            <output>file</output>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>jacoco-initialize</id>
-                                <goals>
-                                    <goal>prepare-agent</goal>
-                                </goals>
-                            </execution>
-                            <execution>
-                                <id>jacoco-check</id>
-                                <phase>test</phase>
-                                <goals>
-                                    <goal>check</goal>
-                                </goals>
-                                <configuration>
-                                    <excludes>
-                                        <exclude>**/*Envelope.class</exclude>
-                                    </excludes>
-                                    <rules>
-                                        <rule>
-                                            <element>BUNDLE</element>
-                                            <limits>
-                                                <limit>
-                                                    <counter>INSTRUCTION</counter>
-                                                    <value>COVEREDRATIO</value>
-                                                    <minimum>0.8</minimum>
-                                                </limit>
-                                                <limit>
-                                                    <counter>LINE</counter>
-                                                    <value>COVEREDRATIO</value>
-                                                    <minimum>0.8</minimum>
-                                                </limit>
-                                                <limit>
-                                                    <counter>BRANCH</counter>
-                                                    <value>COVEREDRATIO</value>
-                                                    <minimum>0.6</minimum>
-                                                </limit>
-                                                <limit>
-                                                    <counter>METHOD</counter>
-                                                    <value>COVEREDRATIO</value>
-                                                    <minimum>0.6</minimum>
-                                                </limit>
-                                            </limits>
-                                        </rule>
-                                    </rules>
-                                </configuration>
-                            </execution>
-                            <execution>
-                                <id>jacoco-site</id>
-                                <phase>install</phase>
-                                <goals>
-                                    <goal>report</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <profile>
-            <id>sonar</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>sonar-maven-plugin</artifactId>
-                        <version>3.3.0.603</version>
-                        <executions>
-                            <execution>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>sonar</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>

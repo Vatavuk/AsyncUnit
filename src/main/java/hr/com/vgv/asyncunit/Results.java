@@ -2,82 +2,79 @@ package hr.com.vgv.asyncunit;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class Results
 {
-    private final Mutex mutex = new Mutex();
-
-    private final AtomicInteger results = new AtomicInteger(0);
-
     private final Queue<Throwable> errors = new ConcurrentLinkedQueue<>();
 
     private final AtomicBoolean waiting = new AtomicBoolean(false);
 
-    public Results()
-    {
-        mutex.lock();
-    }
+    private final Semaphore semaphore = new Semaphore(0);
 
     public void addSuccess()
     {
-        if (results.incrementAndGet() == 0)
-        {
-            mutex.unlock();
-        }
+        semaphore.release();
     }
 
     public void addFailure(Throwable throwable)
     {
         errors.add(throwable);
-        if (results.incrementAndGet() == 0)
-        {
-            mutex.unlock();
-        }
+        semaphore.release();
     }
 
     public void await() throws InterruptedException
     {
-
+        await(0);
     }
 
-    public void await(long period, TimeUnit timeUnit, int repetitions) throws InterruptedException
+    public void await(long period) throws InterruptedException
     {
-        if (waiting.get())
+        await(period, TimeUnit.MILLISECONDS, 1);
+    }
+
+    public void await(long period, int numOfExecutions) throws InterruptedException
+    {
+        await(period, TimeUnit.MILLISECONDS, numOfExecutions);
+    }
+
+    public void await(long period, TimeUnit timeUnit, int numOfExecutions) throws InterruptedException
+    {
+        synchronized (this)
         {
-            throw new IllegalStateException("Cannot wait for results, some other thread is already awaiting.");
+            if (waiting.get())
+            {
+                IllegalStateException exception = new IllegalStateException(
+                    "Cannot wait for results, some other thread is already awaiting.");
+                errors.add(exception);
+                return;
+            }
+            waiting.set(true);
         }
         try
         {
-            waiting.set(true);
-            int numberOfResults = 0;
-            if (numberOfResults < repetitions)
+            if (period == 0)
             {
-                if (period == 0)
-                {
-                    mutex.tryLock();
-                }
-                if (!mutex.tryLock(period, timeUnit))
-                {
-                    throw new AssertionError(notEnoughExecutions(repetitions, numberOfResults));
-                }
+                semaphore.acquire(numOfExecutions);
+            }
+            else if (!semaphore.tryAcquire(numOfExecutions, period, timeUnit))
+            {
+                throw new AssertionError(notEnoughExecutions(numOfExecutions));
             }
         }
         finally
         {
-            mutex.lock();
             waiting.set(false);
-            results.set(0);
             throwOnError();
         }
     }
 
-    private String notEnoughExecutions(int repetitions, int numberOfResults)
+    private String notEnoughExecutions(int expected)
     {
         return String.format(
-            "Expected number of flow executions was %d instead of %d", numberOfResults, repetitions
+            "Number of flow executions was %d instead of %d", expected - semaphore.getQueueLength(), expected
         );
     }
 
@@ -96,8 +93,9 @@ public class Results
         }
     }
 
-    private <T extends Throwable> T sneakyThrow(T throwable)
+    @SuppressWarnings("unchecked")
+    private static <E extends Throwable> void sneakyThrow(Throwable e) throws E
     {
-        return throwable;
+        throw (E) e;
     }
 }
