@@ -30,8 +30,6 @@ public class AsyncFlow
 {
     private static final Map<Long, Results> flow = new ConcurrentHashMap<>();
 
-    private static final Thread main = Thread.currentThread();
-
     /**
      * Prepares Runnable for testing in main class.
      *
@@ -40,18 +38,9 @@ public class AsyncFlow
      */
     public static Runnable prepare(Runnable runnable)
     {
-        Results results = initResults();
-        return () -> {
-            try
-            {
-                runnable.run();
-                results.addSuccess();
-            }
-            catch (Throwable throwable)
-            {
-                results.addFailure(throwable);
-            }
-        };
+        Consumer<Object> prepared = prepare(e -> runnable.run());
+
+        return () -> prepared.accept(null);
     }
 
     /**
@@ -61,9 +50,11 @@ public class AsyncFlow
      * @param <T>      T
      * @return Consumer
      */
-    public static <T> Consumer<T> prepare(Consumer<T> consumer)
+    public static <T, U> Consumer<T> prepare(Consumer<T> consumer)
     {
-        throw new UnsupportedOperationException("#prepare");
+        BiConsumer<T, U> prepared = prepare((T t, U u) -> consumer.accept(t));
+
+        return t -> prepared.accept(t, null);
     }
 
     /**
@@ -76,7 +67,18 @@ public class AsyncFlow
      */
     public static <T, U> BiConsumer<T, U> prepare(BiConsumer<T, U> consumer)
     {
-        throw new UnsupportedOperationException("#prepare");
+        Results results = initResults();
+        return (t, u) -> {
+            try
+            {
+                consumer.accept(t, u);
+                results.addSuccess();
+            }
+            catch (Throwable throwable)
+            {
+                results.addFailure(throwable);
+            }
+        };
     }
 
     /**
