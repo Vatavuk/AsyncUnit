@@ -9,7 +9,7 @@ Advantages over concurentunit:
 
 ## Usage
 Wrap asynchronous part of the code using `AsyncFlow.prepare` and use `AsyncFlow.await` to block the main thread.
-If asynchronous part fails with exception in any thread, the test will also fail. 
+If asynchronous part fails with exception, the test will also fail. 
 
 ```java
 @Test
