@@ -42,12 +42,27 @@ public class AsyncFlowTest
             ).start();
         }
 
-        AsyncFlow.await();
+        AsyncFlow.await(1000, 4);
         Assertions.assertEquals(4, queue.size());
     }
 
     @Test
-    public void failsOnAssertionsionErrorInThread() throws Exception
+    public void failsOnMissingThreadExecutions()
+    {
+        for (int i = 0; i < 2; i++)
+        {
+            new Thread(AsyncFlow.prepare((Runnable) Sleep::now)).start();
+        }
+
+        Assertions.assertThrows(
+            AssertionError.class,
+            () -> AsyncFlow.await(1000, 5),
+            "Number of flow executions was 2 instead of 5"
+        );
+    }
+
+    @Test
+    public void failsOnAssertionsErrorInThread()
     {
         new Thread(
             AsyncFlow.prepare((Runnable) Assertions::fail)
@@ -57,23 +72,26 @@ public class AsyncFlowTest
     }
 
     @Test
-    public void failsOnExceptionThrownInThread() throws Exception
+    public void failsOnExceptionThrownInThread()
     {
         new Thread(
-            (Runnable) AsyncFlow.prepare(() -> {
-                throw new IllegalStateException("");
-            })
+            AsyncFlow.prepare(this::sneakyThrow)
         ).start();
 
         Assertions.assertThrows(IllegalStateException.class, AsyncFlow::await);
     }
 
     @Test
-    public void failsOnThreadInterruption() throws Exception
+    public void failsOnThreadInterruption()
     {
         final Thread main = Thread.currentThread();
-        new Thread(main::interrupt).start();
+        new Thread(AsyncFlow.prepare(main::interrupt)).start();
 
         Assertions.assertThrows(InterruptedException.class, AsyncFlow::await);
+    }
+
+    private void sneakyThrow()
+    {
+        throw new IllegalStateException("");
     }
 }

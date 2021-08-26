@@ -13,40 +13,36 @@ If asynchronous part fails with exception, the test will also fail.
 
 ```java
 @Test
-public void shouldReceiveMessageOnServer() throws Throwable {
+public void doesSomeWorkInSeparateThread() throws Exception {
 
-  server.registerListener(AsyncFlow.prepare(
-      message -> {
-        // Executed on separate thread
-        assertEquals(message.body(), "hello");
-      }
-  ));
-  
-  server.send("hello");
-  
-  // Wait for thread to finish or exit after 2s.
-  AsyncFlow.await(2000);
+    new Thread(
+        AsyncFlow.prepare(() -> {
+            work = doSomeWork();
+            assertNotNull(work);
+        })
+    ).start();
+    
+    AsyncFlow.await();
 }
 ```
  
-Multiple calls to a server:
+Assertions in multiple threads.
 
 ```java
 @Test
-public void shouldReceiveMessageOnServer() throws Throwable {
+public void doesMultipleWorkInThreads() throws Throwable {
 
-  server.registerListener(AsyncFlow.prepare(
-      message -> {
-        // Executed on separate thread
-        assertEquals(message.body(), "hello");
-      }
-  ));
-  
-  server.send("hello");
-  server.send("hello");
-  
-  // Wait for asnyc part to be executed 2 times or exit after 2s 
-  AsyncFlow.await(2000, 2);
+    for (int i = 0; i < 4; i++)
+    {
+        new Thread(
+            AsyncFlow.prepare(() -> {
+                work = doSomeWork();
+                assertNotNull(work);
+            })
+        ).start();
+    }
+    
+    AsyncFlow.await(1000, 4);
 }
 ```
 
