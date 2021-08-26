@@ -4,31 +4,30 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class AsyncFlowTest
 {
-
     @Test
-    public void supportsAssertionsInSingleThread() throws Throwable
+    public void supportsAssertionsInSingleThread() throws Exception
     {
         AtomicBoolean flag = new AtomicBoolean(false);
 
         new Thread(
             AsyncFlow.prepare(() -> {
-                sleepn();
-                Assert.assertTrue(true);
+                Sleep.now();
+                Assertions.assertTrue(true);
                 flag.set(true);
             })
         ).start();
 
         AsyncFlow.await();
-        Assert.assertTrue(flag.get());
+        Assertions.assertTrue(flag.get());
     }
 
     @Test
-    public void supportsAssertionsInMultipleThreads() throws Throwable
+    public void supportsAssertionsInMultipleThreads() throws Exception
     {
         Queue<Long> queue = new ConcurrentLinkedDeque<>();
 
@@ -36,29 +35,29 @@ public class AsyncFlowTest
         {
             new Thread(
                 AsyncFlow.prepare(() -> {
-                    Assert.assertTrue(true);
-                    sleepn();
+                    Assertions.assertTrue(true);
+                    Sleep.now();
                     queue.add(Thread.currentThread().getId());
                 })
             ).start();
         }
 
         AsyncFlow.await();
-        Assert.assertEquals(4, queue.size());
+        Assertions.assertEquals(4, queue.size());
     }
 
-    @Test(expected = AssertionError.class)
-    public void failsOnAssertionErrorInThread() throws Throwable
+    @Test
+    public void failsOnAssertionsionErrorInThread() throws Exception
     {
         new Thread(
-            AsyncFlow.prepare((Runnable) Assert::fail)
+            AsyncFlow.prepare((Runnable) Assertions::fail)
         ).start();
 
-        AsyncFlow.await();
+        Assertions.assertThrows(AssertionError.class, AsyncFlow::await);
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void failsOnExceptionThrownInThread() throws Throwable
+    @Test
+    public void failsOnExceptionThrownInThread() throws Exception
     {
         new Thread(
             (Runnable) AsyncFlow.prepare(() -> {
@@ -66,28 +65,15 @@ public class AsyncFlowTest
             })
         ).start();
 
-        AsyncFlow.await();
+        Assertions.assertThrows(IllegalStateException.class, AsyncFlow::await);
     }
 
-    @Test(expected = InterruptedException.class)
-    public void failsOnThreadInterruption() throws Throwable
+    @Test
+    public void failsOnThreadInterruption() throws Exception
     {
         final Thread main = Thread.currentThread();
         new Thread(main::interrupt).start();
 
-        AsyncFlow.await();
-    }
-
-    private void sleepn()
-    {
-        try
-        {
-            Thread.sleep(200);
-        }
-        catch (InterruptedException e)
-        {
-            Thread.currentThread().interrupt();
-            throw new RuntimeException(e);
-        }
+        Assertions.assertThrows(InterruptedException.class, AsyncFlow::await);
     }
 }
