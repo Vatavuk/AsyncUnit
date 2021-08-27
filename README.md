@@ -45,7 +45,7 @@ public void doesMultipleWorkInThreads() throws Throwable {
     AsyncFlow.await(1000, 4);
 }
 ```
-`AsyncFlow.prepare` can only work properly if it is called on the same thread where `AsyncFlow.await` is triggered.
+`AsyncFlow.await` will work properly only if `AsyncFlow.prepare` is called in the same thread where `await` is triggered.
 This will usually be the main test thread. However, if you need flexibility, you can instantiate `AsyncFlow` and prepare flow lazy:
 ```java
 @Test
