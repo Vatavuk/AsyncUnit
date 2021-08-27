@@ -75,12 +75,12 @@ public class Results
      * Waits for a given number of thread execution results. If a number of received results is not equal to
      * numOfExecutions, it will raise AssertionError.
      *
-     * @param period Time period
+     * @param timeout Time timeout
      * @param timeUnit Time unit
      * @param numOfExecutions Number of expected thread executions
      * @throws InterruptedException If interrupted
      */
-    public void await(long period, TimeUnit timeUnit, int numOfExecutions) throws InterruptedException
+    public void await(long timeout, TimeUnit timeUnit, int numOfExecutions) throws InterruptedException
     {
         synchronized (this)
         {
@@ -95,11 +95,11 @@ public class Results
         }
         try
         {
-            if (period == 0)
+            if (timeout == 0)
             {
                 semaphore.acquire(numOfExecutions);
             }
-            else if (!semaphore.tryAcquire(numOfExecutions, period, timeUnit))
+            else if (!semaphore.tryAcquire(numOfExecutions, timeout, timeUnit))
             {
                 throw new AssertionError(notEnoughExecutions(numOfExecutions));
             }
