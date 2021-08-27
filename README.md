@@ -46,7 +46,7 @@ public void doesMultipleWorkInThreads() throws Throwable {
 }
 ```
 `AsyncFlow.prepare` can only work properly if it is called on the same thread where `AsyncFlow.await` is triggered.
-This will usually be the main test thread. However, if you need flexibility, you can instantiate `AsyncFlow` and `prepare` flow lazy:
+This will usually be the main test thread. However, if you need flexibility, you can instantiate `AsyncFlow` and prepare flow lazy:
 ```java
 @Test
 public void supportsLazyFlowPreparation() throws Exception {
