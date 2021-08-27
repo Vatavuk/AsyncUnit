@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 public class ResultsTest
 {
     private Results results;
@@ -66,11 +68,10 @@ public class ResultsTest
                 results.addSuccess();
             }).start();
         }
-        Assertions.assertThrows(
-            AssertionError.class,
-            () -> results.await(1000, 4),
-            "Number of flow executions was 3 instead of 4"
-        );
+
+        assertThatThrownBy(() -> results.await(1000, 4))
+            .isInstanceOf(AssertionError.class)
+            .hasMessageContaining("Number of flow executions was 3 instead of 4");
     }
 
     @Test
@@ -83,11 +84,9 @@ public class ResultsTest
 
         Sleep.now(300);
 
-        Assertions.assertThrows(
-            AssertionError.class,
-            () -> results.await(100, 4),
-            "Number of flow executions was 3 instead of 4"
-        );
+        assertThatThrownBy(() -> results.await(100, 4))
+            .isInstanceOf(AssertionError.class)
+            .hasMessageContaining("Number of flow executions was 3 instead of 4");
     }
 
     @Test
@@ -133,11 +132,9 @@ public class ResultsTest
             results.addSuccess();
         }).start();
 
-        Assertions.assertThrows(
-            IllegalStateException.class,
-            () -> results.await(),
-            "Cannot wait for results, some other thread is already awaiting."
-        );
+        assertThatThrownBy(() -> results.await())
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("Cannot wait for results, some other thread is already awaiting.");
     }
 
     private void awaitResults()

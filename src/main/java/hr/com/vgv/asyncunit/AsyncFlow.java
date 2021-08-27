@@ -171,19 +171,13 @@ public class AsyncFlow
 
     public static void await(long timeout, TimeUnit timeUnit, int times) throws InterruptedException
     {
-        long thread = currentThread();
-        if (!flow.containsKey(thread))
-        {
-            throw new IllegalStateException(
-                "No async flow prepared int this thread. Use AsyncFlow.prepare method before calling await");
-        }
         try
         {
-            flow.get(thread).await(timeout, timeUnit, times);
+            initResults().await(timeout, timeUnit, times);
         }
         finally
         {
-            flow.remove(thread);
+            flow.remove(currentThread());
         }
     }
 
