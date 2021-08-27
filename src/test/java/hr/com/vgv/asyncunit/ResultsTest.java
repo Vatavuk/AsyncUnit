@@ -37,7 +37,7 @@ public class ResultsTest
 
         results.await(4000, 4);
 
-        Assertions.assertEquals(3, queue.size());
+        Assertions.assertEquals(4, queue.size());
     }
 
     @Test
