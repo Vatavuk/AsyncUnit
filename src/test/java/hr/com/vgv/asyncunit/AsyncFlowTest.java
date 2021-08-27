@@ -3,6 +3,7 @@ package hr.com.vgv.asyncunit;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -44,6 +45,27 @@ public class AsyncFlowTest
 
         AsyncFlow.await(1000, 4);
         Assertions.assertEquals(4, queue.size());
+    }
+
+    @Test
+    public void supportsSupplierFlowAssertions() throws InterruptedException
+    {
+        final AtomicBoolean flag = new AtomicBoolean(false);
+
+        final Consumer<AtomicBoolean> flow = AsyncFlow.prepare(e -> {
+            Sleep.now();
+            Assertions.assertTrue(true);
+            e.set(true);
+        });
+        new Thread(
+            () -> {
+                Sleep.now();
+                flow.accept(flag);
+            }
+        ).start();
+
+        AsyncFlow.await();
+        Assertions.assertTrue(flag.get());
     }
 
     @Test

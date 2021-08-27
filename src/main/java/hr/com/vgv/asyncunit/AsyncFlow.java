@@ -90,20 +90,11 @@ public class AsyncFlow
      */
     public static <T> Supplier<T> prepare(Supplier<T> supplier)
     {
-        Results results = initResults();
-        return () -> {
-            try
-            {
-                T result = supplier.get();
-                results.addSuccess();
-                return result;
-            }
-            catch (Throwable throwable)
-            {
-                results.addFailure(throwable);
-                throw throwable;
-            }
-        };
+        /**/
+
+        Function<Object, T> perpared = prepareFn((t) -> supplier.get());
+
+        return () -> perpared.apply(null);
     }
 
     /**
@@ -114,9 +105,11 @@ public class AsyncFlow
      * @param <R>      R
      * @return Function
      */
-    public static <T, R> Function<T, R> prepareFn(Function<T, R> function)
+    public static <T, U, R> Function<T, R> prepareFn(Function<T, R> function)
     {
-        throw new UnsupportedOperationException("#prepare");
+        BiFunction<T, U, R> prepared = prepareFn((T t, U u) -> function.apply(t));
+
+        return t -> prepared.apply(t, null);
     }
 
     /**
@@ -130,7 +123,20 @@ public class AsyncFlow
      */
     public static <T, U, R> BiFunction<T, U, R> prepareFn(BiFunction<T, U, R> function)
     {
-        throw new UnsupportedOperationException("#prepare");
+        Results results = initResults();
+        return (T t, U u) -> {
+            try
+            {
+                R result = function.apply(t, u);
+                results.addSuccess();
+                return result;
+            }
+            catch (Throwable throwable)
+            {
+                results.addFailure(throwable);
+                throw throwable;
+            }
+        };
     }
 
     /**
