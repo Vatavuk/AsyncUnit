@@ -156,7 +156,7 @@ public class AsyncFlow
      */
     public static void await(long timeout) throws InterruptedException
     {
-        await(0, TimeUnit.MILLISECONDS);
+        await(timeout, TimeUnit.MILLISECONDS, 1);
     }
 
     public static void await(long timeout, TimeUnit timeUnit) throws InterruptedException

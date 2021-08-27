@@ -2,6 +2,7 @@ package hr.com.vgv.asyncunit;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
@@ -127,21 +128,21 @@ public class AsyncFlowTest
         assertThrows(InterruptedException.class, AsyncFlow::await);
     }
 
-    /*@Test
+    @Test
     public void failsOnNoFlowPrepared()
     {
-        assertThrows(IllegalStateException.class, () -> AsyncFlow.await(100));
-    }*/
+        assertThrows(AssertionError.class, () -> AsyncFlow.await(100));
+    }
 
-    /*@Test
+    @Test
     public void failsOnPreparingFlowLazyUsingStaticMethods()
     {
         new Thread(
             () -> AsyncFlow.prepare(() -> assertTrue(true)).run()
         ).start();
 
-        assertThrows(IllegalStateException.class, () -> AsyncFlow.await(100));
-    }*/
+        assertThrows(AssertionError.class, () -> AsyncFlow.await(100, TimeUnit.MILLISECONDS));
+    }
 
     private void sneakyThrow()
     {
