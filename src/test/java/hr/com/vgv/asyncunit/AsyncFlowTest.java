@@ -13,8 +13,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import jdk.nashorn.internal.ir.annotations.Ignore;
-
 public class AsyncFlowTest
 {
     @Test
