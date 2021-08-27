@@ -18,7 +18,7 @@ public class ResultsTest
     @BeforeEach
     public void setup()
     {
-        results = new Results();
+        results = new Results.Synced();
     }
 
     @Test

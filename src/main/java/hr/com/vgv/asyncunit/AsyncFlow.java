@@ -21,7 +21,7 @@ import java.util.function.Supplier;
  * <p>
  * AsyncFlow.await();
  *
- * <b>Note</b>: Prepare and await calls must be done on the same thread, usually this will be
+ * <b>Note</b>: Prepare and await calls must be executed on the same thread, usually this will be
  * the main test thread.
  *
  * @author Vedran Vatavuk
@@ -190,13 +190,17 @@ public class AsyncFlow
         return flow.get(thread);
     }
 
+    /**
+     * Async flow bounded to a single instance scope. Enables lazy flow preparation, prepare calls doesn't need
+     * to be executed on the same thread where await call is triggered.
+     */
     public static class Single
     {
         private final Results results;
 
         public Single()
         {
-            this(new Results());
+            this(new Results.Synced());
         }
 
         public Single(Results results)

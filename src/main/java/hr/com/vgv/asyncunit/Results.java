@@ -7,145 +7,188 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Thread execution results. It can receive execution results from different threads and wait until all
- * executions are received or until timeout expires.
+ * Execution flow results. Used to wait and obtain results from different threads.
  *
  * @author Vedran Vatavuk
  */
-public class Results
+public interface Results
 {
-    private final Queue<Throwable> errors = new ConcurrentLinkedQueue<>();
-
-    private final AtomicBoolean waiting = new AtomicBoolean(false);
-
-    private Semaphore semaphore = new Semaphore(0);
-
     /**
-     * Signal successful execution of a thread.
+     * Signal successful execution.
      */
-    public void addSuccess()
-    {
-        semaphore.release();
-    }
+    void addSuccess();
 
     /**
-     * Add throwable that caused a thread to fail.
+     * Signal failed execution.
      */
-    public void addFailure(Throwable throwable)
-    {
-        errors.add(throwable);
-        semaphore.release();
-    }
+    void addFailure(Throwable throwable);
 
     /**
-     * Waits for a single thread execution result. It will wait until interrupted.
+     * Waits for a single execution result. It will wait until interrupted if no result received.
      *
      * @throws InterruptedException If interrupted
      */
-    public void await() throws InterruptedException
-    {
-        await(0);
-    }
+    void await() throws InterruptedException;
 
     /**
-     * Waits for a single thread execution result. If no result received until given period, it will raise
-     * AssertionError.
+     * Waits for a single execution result. Raises AssertionError after period expires if no result received.
      *
      * @param period Time period in milliseconds
      * @throws InterruptedException If interrupted
      */
-    public void await(long period) throws InterruptedException
-    {
-        await(period, TimeUnit.MILLISECONDS, 1);
-    }
+    void await(long period) throws InterruptedException;
 
     /**
-     * Waits for a given number of thread execution results. If a number of received results is not equal to
-     * numOfExecutions, it will raise AssertionError.
+     * Waits for a single execution result. Raises AssertionError after period expires if no result received.
      *
-     * @param period Time period in milliseconds
+     * @param period Time period
+     * @param timeUnit Time unit
      * @throws InterruptedException If interrupted
      */
-    public void await(long period, int numOfExecutions) throws InterruptedException
-    {
-        await(period, TimeUnit.MILLISECONDS, numOfExecutions);
-    }
+    void await(long period, TimeUnit timeUnit) throws InterruptedException;
 
     /**
-     * Waits for a given number of thread execution results. If a number of received results is not equal to
-     * numOfExecutions, it will raise AssertionError.
+     * Waits until given number of execution results are obtained. Raises AssertionError after period expires if number of
+     * received results is less than expected.
      *
-     * @param timeout         Time timeout
-     * @param timeUnit        Time unit
-     * @param numOfExecutions Number of expected thread executions
+     * @param period       Time period in milliseconds
+     * @param numOfResults Number of expected results
      * @throws InterruptedException If interrupted
      */
-    public void await(long timeout, TimeUnit timeUnit, int numOfExecutions) throws InterruptedException
-    {
-        synchronized (this)
-        {
-            if (waiting.get())
-            {
-                IllegalStateException exception = new IllegalStateException(
-                    "Cannot wait for results, some other thread is already awaiting.");
-                errors.add(exception);
-                return;
-            }
-            waiting.set(true);
-        }
-        try
-        {
-            if (timeout == 0)
-            {
-                semaphore.acquire(numOfExecutions);
-            }
-            else if (!semaphore.tryAcquire(numOfExecutions, timeout, timeUnit))
-            {
-                throw new AssertionError(notEnoughExecutions(numOfExecutions));
-            }
-        }
-        finally
-        {
-            semaphore = new Semaphore(0);
-            waiting.set(false);
-            throwOnError();
-        }
-    }
+    void await(long period, int numOfResults) throws InterruptedException;
 
     /**
-     * Constructs error message.
+     * Waits until given number of execution results are obtained. Raises AssertionError after period expires if number of
+     * received results is less than expected.
      *
-     * @param expected Expected number of executions
-     * @return Error message
+     * @param period       Time timeout
+     * @param timeUnit     Time unit
+     * @param numOfResults Number of expected thread executions
+     * @throws InterruptedException If interrupted
      */
-    private String notEnoughExecutions(int expected)
-    {
-        return String.format(
-            "Number of flow executions was %d instead of %d", semaphore.availablePermits(), expected
-        );
-    }
+    void await(long period, TimeUnit timeUnit, int numOfResults) throws InterruptedException;
+
 
     /**
-     * Throws throwable if any of threads ended with an exception.
+     * Execution flow results synced by semaphore. It can receive execution results from different threads and wait until all
+     * executions are received or until timeout expires.
+     *
+     * @author Vedran Vatavuk
      */
-    private void throwOnError()
+    class Synced implements Results
     {
-        try
+
+        private final Queue<Throwable> errors = new ConcurrentLinkedQueue<>();
+
+        private final AtomicBoolean waiting = new AtomicBoolean(false);
+
+        private Semaphore semaphore = new Semaphore(0);
+
+        @Override
+        public void addSuccess()
         {
-            if (!errors.isEmpty())
+            semaphore.release();
+        }
+
+        @Override
+        public void addFailure(Throwable throwable)
+        {
+            errors.add(throwable);
+            semaphore.release();
+        }
+
+        @Override
+        public void await() throws InterruptedException
+        {
+            await(0);
+        }
+
+        @Override
+        public void await(long period) throws InterruptedException
+        {
+            await(period, TimeUnit.MILLISECONDS, 1);
+        }
+
+        @Override
+        public void await(long period, TimeUnit timeUnit) throws InterruptedException
+        {
+            await(period, timeUnit, 1);
+        }
+
+        @Override
+        public void await(long period, int numOfResults) throws InterruptedException
+        {
+            await(period, TimeUnit.MILLISECONDS, numOfResults);
+        }
+
+        @Override
+        public void await(long period, TimeUnit timeUnit, int numOfResults) throws InterruptedException
+        {
+            synchronized (this)
             {
-                sneakyThrow(errors.peek());
+                if (waiting.get())
+                {
+                    IllegalStateException exception = new IllegalStateException(
+                        "Cannot wait for results, some other thread is already awaiting.");
+                    errors.add(exception);
+                    return;
+                }
+                waiting.set(true);
+            }
+            try
+            {
+                if (period == 0)
+                {
+                    semaphore.acquire(numOfResults);
+                }
+                else if (!semaphore.tryAcquire(numOfResults, period, timeUnit))
+                {
+                    throw new AssertionError(notEnoughExecutions(numOfResults));
+                }
+            }
+            finally
+            {
+                semaphore = new Semaphore(0);
+                waiting.set(false);
+                throwOnError();
             }
         }
-        finally
-        {
-            errors.clear();
-        }
-    }
 
-    @SuppressWarnings("unchecked")
-    private static <E extends Throwable> void sneakyThrow(Throwable e) throws E
-    {
-        throw (E) e;
+        /**
+         * Constructs error message.
+         *
+         * @param expected Expected number of executions
+         * @return Error message
+         */
+        private String notEnoughExecutions(int expected)
+        {
+            return String.format(
+                "Number of flow executions was %d instead of %d", semaphore.availablePermits(), expected
+            );
+        }
+
+        /**
+         * Throws throwable if any of threads ended with an exception.
+         */
+        private void throwOnError()
+        {
+            try
+            {
+                if (!errors.isEmpty())
+                {
+                    sneakyThrow(errors.peek());
+                }
+            }
+            finally
+            {
+                errors.clear();
+            }
+        }
+
+        @SuppressWarnings("unchecked")
+        private static <E extends Throwable> void sneakyThrow(Throwable e) throws E
+        {
+            throw (E) e;
+        }
     }
 }
