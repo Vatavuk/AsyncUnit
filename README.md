@@ -51,7 +51,7 @@ This will usually be the main test thread. However, if you need flexibility, you
 @Test
 public void supportsLazyFlowPreparation() throws Exception {
 
-    AsyncFlow flow = new AsyncFlow();
+    AsyncFlow.Single flow = new AsyncFlow.Single();
 
     new Thread(() -> {
         flow.prepare(() -> {

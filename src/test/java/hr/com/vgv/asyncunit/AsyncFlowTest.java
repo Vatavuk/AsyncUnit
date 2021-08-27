@@ -5,6 +5,7 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -53,19 +54,39 @@ public class AsyncFlowTest
     }
 
     @Test
-    public void supportsSupplierFlowAssertions() throws InterruptedException
+    public void supportsConsumerFlowAssertions() throws InterruptedException
     {
         final AtomicBoolean flag = new AtomicBoolean(false);
 
         final Consumer<AtomicBoolean> flow = AsyncFlow.prepare(e -> {
             Sleep.now();
-            assertTrue(true);
             e.set(true);
         });
         new Thread(
             () -> {
                 Sleep.now();
                 flow.accept(flag);
+            }
+        ).start();
+
+        AsyncFlow.await();
+        assertTrue(flag.get());
+    }
+
+    @Test
+    public void supportsSupplierFlowAssertions() throws InterruptedException
+    {
+        final AtomicBoolean flag = new AtomicBoolean(false);
+
+        final Supplier<AtomicBoolean> flow = AsyncFlow.prepare(() -> {
+            Sleep.now();
+            assertTrue(true);
+            return new AtomicBoolean(true);
+        });
+        new Thread(
+            () -> {
+                Sleep.now();
+                flag.set(flow.get().get());
             }
         ).start();
 
@@ -140,6 +161,24 @@ public class AsyncFlowTest
         ).start();
 
         assertThrows(AssertionError.class, () -> AsyncFlow.await(100, TimeUnit.MILLISECONDS));
+    }
+
+    @Test
+    public void supportsLazyPreparationInSingleFlow() throws InterruptedException
+    {
+        AsyncFlow.Single flow = new AsyncFlow.Single();
+        final AtomicBoolean flag = new AtomicBoolean(false);
+
+        new Thread(() ->
+            flow.prepare(() -> {
+                Sleep.now();
+                flag.set(true);
+            }).run()
+        ).start();
+
+        flow.await(400, TimeUnit.MILLISECONDS);
+
+        assertTrue(flag.get());
     }
 
     private void sneakyThrow()
