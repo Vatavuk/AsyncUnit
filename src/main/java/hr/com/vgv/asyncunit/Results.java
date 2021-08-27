@@ -18,7 +18,7 @@ public class Results
 
     private final AtomicBoolean waiting = new AtomicBoolean(false);
 
-    private final Semaphore semaphore = new Semaphore(0);
+    private Semaphore semaphore = new Semaphore(0);
 
     /**
      * Signal successful execution of a thread.
@@ -75,8 +75,8 @@ public class Results
      * Waits for a given number of thread execution results. If a number of received results is not equal to
      * numOfExecutions, it will raise AssertionError.
      *
-     * @param timeout Time timeout
-     * @param timeUnit Time unit
+     * @param timeout         Time timeout
+     * @param timeUnit        Time unit
      * @param numOfExecutions Number of expected thread executions
      * @throws InterruptedException If interrupted
      */
@@ -106,6 +106,7 @@ public class Results
         }
         finally
         {
+            semaphore = new Semaphore(0);
             waiting.set(false);
             throwOnError();
         }
@@ -120,7 +121,7 @@ public class Results
     private String notEnoughExecutions(int expected)
     {
         return String.format(
-            "Number of flow executions was %d instead of %d", expected - semaphore.getQueueLength(), expected
+            "Number of flow executions was %d instead of %d", semaphore.availablePermits(), expected
         );
     }
 

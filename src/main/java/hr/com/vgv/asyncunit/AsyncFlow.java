@@ -28,7 +28,7 @@ import java.util.function.Supplier;
  */
 public class AsyncFlow
 {
-    private static final Map<Long, Results> flow = new ConcurrentHashMap<>();
+    private static final Map<Long, AsyncFlow.Single> flow = new ConcurrentHashMap<>();
 
     /**
      * Prepares Runnable for testing in main class.
@@ -38,9 +38,7 @@ public class AsyncFlow
      */
     public static Runnable prepare(Runnable runnable)
     {
-        Consumer<Object> prepared = prepare(e -> runnable.run());
-
-        return () -> prepared.accept(null);
+        return currentFlow().prepare(runnable);
     }
 
     /**
@@ -50,11 +48,9 @@ public class AsyncFlow
      * @param <T>      T
      * @return Consumer
      */
-    public static <T, U> Consumer<T> prepare(Consumer<T> consumer)
+    public static <T> Consumer<T> prepare(Consumer<T> consumer)
     {
-        BiConsumer<T, U> prepared = prepare((T t, U u) -> consumer.accept(t));
-
-        return t -> prepared.accept(t, null);
+        return currentFlow().prepare(consumer);
     }
 
     /**
@@ -67,18 +63,7 @@ public class AsyncFlow
      */
     public static <T, U> BiConsumer<T, U> prepare(BiConsumer<T, U> consumer)
     {
-        Results results = initResults();
-        return (t, u) -> {
-            try
-            {
-                consumer.accept(t, u);
-                results.addSuccess();
-            }
-            catch (Throwable throwable)
-            {
-                results.addFailure(throwable);
-            }
-        };
+        return currentFlow().prepare(consumer);
     }
 
     /**
@@ -90,11 +75,7 @@ public class AsyncFlow
      */
     public static <T> Supplier<T> prepare(Supplier<T> supplier)
     {
-        /**/
-
-        Function<Object, T> perpared = prepareFn((t) -> supplier.get());
-
-        return () -> perpared.apply(null);
+        return currentFlow().prepare(supplier);
     }
 
     /**
@@ -105,11 +86,9 @@ public class AsyncFlow
      * @param <R>      R
      * @return Function
      */
-    public static <T, U, R> Function<T, R> prepareFn(Function<T, R> function)
+    public static <T, R> Function<T, R> prepareFn(Function<T, R> function)
     {
-        BiFunction<T, U, R> prepared = prepareFn((T t, U u) -> function.apply(t));
-
-        return t -> prepared.apply(t, null);
+        return currentFlow().prepareFn(function);
     }
 
     /**
@@ -123,20 +102,7 @@ public class AsyncFlow
      */
     public static <T, U, R> BiFunction<T, U, R> prepareFn(BiFunction<T, U, R> function)
     {
-        Results results = initResults();
-        return (T t, U u) -> {
-            try
-            {
-                R result = function.apply(t, u);
-                results.addSuccess();
-                return result;
-            }
-            catch (Throwable throwable)
-            {
-                results.addFailure(throwable);
-                throw throwable;
-            }
-        };
+        return currentFlow().prepareFn(function);
     }
 
     /**
@@ -152,50 +118,249 @@ public class AsyncFlow
     /**
      * Waits for a prepared async flow to finishes. It raises AssertionError after timeout expires.
      *
+     * @param timeout Timeout
      * @throws InterruptedException If interrupted
      */
     public static void await(long timeout) throws InterruptedException
     {
-        await(0, TimeUnit.MILLISECONDS);
+        await(timeout, TimeUnit.MILLISECONDS, 1);
     }
 
+    /**
+     * Waits for a prepared async flow to finishes. It raises AssertionError after timeout expires.
+     *
+     * @param timeout Timeout
+     * @param timeUnit Timeout units
+     * @throws InterruptedException If interrupted
+     */
     public static void await(long timeout, TimeUnit timeUnit) throws InterruptedException
     {
         await(timeout, timeUnit, 1);
     }
 
+    /**
+     * Waits for a prepared async flow to finishes defined number of times. It raises AssertionError after timeout expires.
+     *
+     * @param timeout Timeout
+     * @param times Number of flow executions to wait
+     * @throws InterruptedException If interrupted
+     */
     public static void await(long timeout, int times) throws InterruptedException
     {
         await(timeout, TimeUnit.MILLISECONDS, times);
     }
 
+    /**
+     * Waits for a prepared async flow to finishes defined number of times. It raises AssertionError after timeout expires.
+     *
+     * @param timeout Timeout
+     * @param timeUnit Timeout units
+     * @param times Number of flow executions to wait
+     * @throws InterruptedException If interrupted
+     */
     public static void await(long timeout, TimeUnit timeUnit, int times) throws InterruptedException
     {
-        long thread = currentThread();
-        if (!flow.containsKey(thread))
-        {
-            throw new IllegalStateException(
-                "No async flow prepared int this thread. Use AsyncFlow.prepare method before calling await");
-        }
         try
         {
-            flow.get(thread).await(timeout, timeUnit, times);
+            currentFlow().await(timeout, timeUnit, times);
         }
         finally
         {
-            flow.remove(thread);
+            flow.remove(currentThread());
         }
     }
 
+    /**
+     * Fetch current thread.
+     * @return Thread
+     */
     private static long currentThread()
     {
         return Thread.currentThread().getId();
     }
 
-    private static Results initResults()
+    /**
+     * Fetch async flow in current thread or instantiate a new one if it doesn't exist.
+     * @return Async flow
+     */
+    private static AsyncFlow.Single currentFlow()
     {
         long thread = currentThread();
-        flow.putIfAbsent(thread, new Results());
+        flow.putIfAbsent(thread, new AsyncFlow.Single());
         return flow.get(thread);
+    }
+
+    public static class Single
+    {
+        private final Results results;
+
+        public Single()
+        {
+            this(new Results());
+        }
+
+        public Single(Results results)
+        {
+            this.results = results;
+        }
+
+        /**
+         * Prepares Runnable for testing in main class.
+         *
+         * @param runnable Runnable under test
+         * @return Runnable
+         */
+        public final Runnable prepare(Runnable runnable)
+        {
+            Consumer<Object> prepared = prepare(e -> runnable.run());
+            return () -> prepared.accept(null);
+        }
+
+        /**
+         * Prepares Consumer for testing in main class.
+         *
+         * @param consumer Consumer under test
+         * @param <T>      T
+         * @return Consumer
+         */
+        public final <T, U> Consumer<T> prepare(Consumer<T> consumer)
+        {
+            BiConsumer<T, U> prepared = prepare((T t, U u) -> consumer.accept(t));
+            return t -> prepared.accept(t, null);
+        }
+
+        /**
+         * Prepares BiConsumer for testing in main class.
+         *
+         * @param consumer BiConsumer under test
+         * @param <T>      T
+         * @param <U>      U
+         * @return BiConsumer
+         */
+        public final <T, U> BiConsumer<T, U> prepare(BiConsumer<T, U> consumer)
+        {
+            return (t, u) -> {
+                try
+                {
+                    consumer.accept(t, u);
+                    results.addSuccess();
+                }
+                catch (Throwable throwable)
+                {
+                    results.addFailure(throwable);
+                }
+            };
+        }
+
+        /**
+         * Prepares Supplier for testing in main class.
+         *
+         * @param supplier Supplier under test
+         * @param <T>      T
+         * @return Supplier
+         */
+        public final <T> Supplier<T> prepare(Supplier<T> supplier)
+        {
+            Function<Object, T> prepared = prepareFn((t) -> supplier.get());
+            return () -> prepared.apply(null);
+        }
+
+        /**
+         * Prepares Function for testing in main class.
+         *
+         * @param function Function under test
+         * @param <T>      T
+         * @param <R>      R
+         * @return Function
+         */
+        public final <T, U, R> Function<T, R> prepareFn(Function<T, R> function)
+        {
+            BiFunction<T, U, R> prepared = prepareFn((T t, U u) -> function.apply(t));
+            return t -> prepared.apply(t, null);
+        }
+
+        /**
+         * Prepares BiFunction for testing in main class.
+         *
+         * @param function BiFunction under test
+         * @param <T>      T
+         * @param <U>      U
+         * @param <R>      R
+         * @return BiFunction
+         */
+        public final <T, U, R> BiFunction<T, U, R> prepareFn(BiFunction<T, U, R> function)
+        {
+            return (T t, U u) -> {
+                try
+                {
+                    R result = function.apply(t, u);
+                    results.addSuccess();
+                    return result;
+                }
+                catch (Throwable throwable)
+                {
+                    results.addFailure(throwable);
+                    throw throwable;
+                }
+            };
+        }
+
+        /**
+         * Waits for a prepared async flow to finishes.
+         *
+         * @throws InterruptedException If interrupted
+         */
+        public final void await() throws InterruptedException
+        {
+            await(0);
+        }
+
+        /**
+         * Waits for a prepared async flow to finishes. It raises AssertionError after timeout expires.
+         *
+         * @param timeout Timeout
+         * @throws InterruptedException If interrupted
+         */
+        public final void await(long timeout) throws InterruptedException
+        {
+            await(timeout, TimeUnit.MILLISECONDS, 1);
+        }
+
+        /**
+         * Waits for a prepared async flow to finishes. It raises AssertionError after timeout expires.
+         *
+         * @param timeout Timeout
+         * @param timeUnit Timeout units
+         * @throws InterruptedException If interrupted
+         */
+        public final void await(long timeout, TimeUnit timeUnit) throws InterruptedException
+        {
+            await(timeout, timeUnit, 1);
+        }
+
+        /**
+         * Waits for a prepared async flow to finishes defined number of times. It raises AssertionError after timeout expires.
+         *
+         * @param timeout Timeout
+         * @param times Number of flow executions to wait
+         * @throws InterruptedException If interrupted
+         */
+        public final void await(long timeout, int times) throws InterruptedException
+        {
+            await(timeout, TimeUnit.MILLISECONDS, times);
+        }
+
+        /**
+         * Waits for a prepared async flow to finishes defined number of times. It raises AssertionError after timeout expires.
+         *
+         * @param timeout Timeout
+         * @param timeUnit Timeout units
+         * @param times Number of flow executions to wait
+         * @throws InterruptedException If interrupted
+         */
+        public final void await(long timeout, TimeUnit timeUnit, int times) throws InterruptedException
+        {
+            results.await(timeout, timeUnit, times);
+        }
     }
 }
