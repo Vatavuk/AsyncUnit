@@ -17,8 +17,6 @@ jobs:
           server-password: MAVEN_PASSWORD
       - name: Set release version
         run: mvn -Dstyle.color=never -U versions:set "-DnewVersion=${{ github.event.release.tag_name }}" 
-      - name: Commit version
-        run: git commit -am "${{ github.event.release.tag_name }}"
       - name: Publish package
         run: mvn clean deploy -Psonatype
         env:
