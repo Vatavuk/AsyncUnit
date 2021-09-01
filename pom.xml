@@ -27,7 +27,7 @@ SOFTWARE.
 
     <groupId>hr.com.vgv.asyncunit</groupId>
     <artifactId>asyncunit</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>0.1.2-alpha</version>
     <name>asyncunit</name>
     <description>Simple tool for testing multi-threaded code</description>
     <url>https://github.com/Vatavuk/asyncunit</url>
@@ -40,10 +40,15 @@ SOFTWARE.
         </developer>
     </developers>
     <distributionManagement>
+        <downloadUrl>https://oss.sonatype.org/content/groups/public</downloadUrl>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
         <repository>
             <id>ossrh</id>
-            <name>Central Repository OSSRH</name>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/
+            </url>
         </repository>
     </distributionManagement>
     <scm>
