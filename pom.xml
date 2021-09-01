@@ -47,10 +47,9 @@ SOFTWARE.
         </repository>
     </distributionManagement>
     <scm>
-        <url>https://github.com/Vatavuk/asyncunit.git</url>
-        <connection>scm:git:git://github.com/Vatavuk/asyncunit.git</connection>
-        <developerConnection>scm:git:git@github.com:github.com/Vatavuk/asyncunit.git</developerConnection>
-        <tag>asyncunit-1.0</tag>
+        <url>https://github.com/Vatavuk/asyncunit</url>
+        <connection>scm:git:https://github.com/Vatavuk/asyncunit.git</connection>
+        <tag>HEAD</tag>
     </scm>
     <build>
         <pluginManagement>
