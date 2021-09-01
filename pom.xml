@@ -22,13 +22,12 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>hr.com.vgv.asyncunit</groupId>
     <artifactId>asyncunit</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
     <name>asyncunit</name>
     <description>Simple tool for testing multi-threaded code</description>
     <url>https://github.com/Vatavuk/asyncunit</url>
@@ -51,7 +50,7 @@ SOFTWARE.
         <url>https://github.com/Vatavuk/asyncunit</url>
         <connection>scm:git:https://github.com/Vatavuk/asyncunit.git</connection>
         <developerConnection>scm:git:https://github.com/Vatavuk/asyncunit.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>asyncunit-1.0</tag>
     </scm>
     <build>
         <pluginManagement>
