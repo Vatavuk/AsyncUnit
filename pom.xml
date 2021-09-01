@@ -27,7 +27,7 @@ SOFTWARE.
 
     <groupId>hr.com.vgv.asyncunit</groupId>
     <artifactId>asyncunit</artifactId>
-    <version>1.0</version>
+    <version>1.1-SNAPSHOT</version>
     <name>asyncunit</name>
     <description>Simple tool for testing multi-threaded code</description>
     <url>https://github.com/Vatavuk/asyncunit</url>
@@ -50,7 +50,7 @@ SOFTWARE.
         <url>https://github.com/Vatavuk/asyncunit</url>
         <connection>scm:git:https://github.com/Vatavuk/asyncunit.git</connection>
         <developerConnection>scm:git:https://github.com/Vatavuk/asyncunit.git</developerConnection>
-        <tag>asyncunit-1.0</tag>
+        <tag>HEAD</tag>
     </scm>
     <build>
         <pluginManagement>
