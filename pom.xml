@@ -49,8 +49,8 @@ SOFTWARE.
     </distributionManagement>
     <scm>
         <url>https://github.com/Vatavuk/asyncunit</url>
-        <connection>scm:git:ssh://github.com/Vatavuk/asyncunit.git</connection>
-        <developerConnection>scm:git:ssh://github.com/Vatavuk/asyncunit.git</developerConnection>
+        <connection>scm:git:git://github.com/Vatavuk/asyncunit.git</connection>
+        <developerConnection>scm:git:https://github.com/Vatavuk/asyncunit.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
     <build>
