@@ -1,0 +1,54 @@
+name: release-project
+on:
+  workflow_dispatch:
+    inputs:
+      since:
+        description: Base Version
+        required: true
+      version:
+        description: Bump Version
+        required: true
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      # Publish to Maven Central
+      - uses: actions/checkout@v2
+      - name: Set up maven settings.xml
+        id: setup_maven
+        uses: actions/setup-java@v2
+        with:
+          java-version: '8'
+          distribution: 'adopt'
+          server-id: oss.sonatype.org
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_PASSWORD
+          gpg-private-key: ${{ secrets.GPG_SECRET_KEY }}
+          gpg-passphrase: MAVEN_GPG_PASSPHRASE
+      - name: Set release version
+        id: set_version
+        run: mvn -Dstyle.color=never -U versions:set "-DnewVersion=${{ github.event.inputs.version }}"
+      - name: Publish to Maven Central
+        id: publish_package
+        run: mvn clean deploy -PmavenCentral
+        env:
+          MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.OSSRH_PASS }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+      # Publish to Github
+      - name: Generate changelog
+        uses: heinrichreimer/github-changelog-generator-action@v2.1.1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          sinceTag: ${{ github.event.inputs.since }}
+      - name: Create Release on Github
+        id: changelog
+        uses: actions/create-release@latest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.event.inputs.version }}
+          release_name: Release ${{ github.event.inputs.version }}
+          body: ${{ steps.changelog.outputs.changelog }}
+          draft: false
+          prerelease: false
