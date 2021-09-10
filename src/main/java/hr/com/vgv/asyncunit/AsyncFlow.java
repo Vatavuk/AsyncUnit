@@ -1,5 +1,8 @@
 package hr.com.vgv.asyncunit;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -129,7 +132,7 @@ public class AsyncFlow
     /**
      * Waits for a prepared async flow to finishes. It raises AssertionError after timeout expires.
      *
-     * @param timeout Timeout
+     * @param timeout  Timeout
      * @param timeUnit Timeout units
      * @throws InterruptedException If interrupted
      */
@@ -142,7 +145,7 @@ public class AsyncFlow
      * Waits for a prepared async flow to finishes defined number of times. It raises AssertionError after timeout expires.
      *
      * @param timeout Timeout
-     * @param times Number of flow executions to wait
+     * @param times   Number of flow executions to wait
      * @throws InterruptedException If interrupted
      */
     public static void await(long timeout, int times) throws InterruptedException
@@ -153,9 +156,9 @@ public class AsyncFlow
     /**
      * Waits for a prepared async flow to finishes defined number of times. It raises AssertionError after timeout expires.
      *
-     * @param timeout Timeout
+     * @param timeout  Timeout
      * @param timeUnit Timeout units
-     * @param times Number of flow executions to wait
+     * @param times    Number of flow executions to wait
      * @throws InterruptedException If interrupted
      */
     public static void await(long timeout, TimeUnit timeUnit, int times) throws InterruptedException
@@ -172,6 +175,7 @@ public class AsyncFlow
 
     /**
      * Fetch current thread.
+     *
      * @return Thread
      */
     private static long currentThread()
@@ -181,6 +185,7 @@ public class AsyncFlow
 
     /**
      * Fetch async flow in current thread or instantiate a new one if it doesn't exist.
+     *
      * @return Async flow
      */
     private static AsyncFlow.Single currentFlow()
@@ -197,15 +202,36 @@ public class AsyncFlow
     public static class Single
     {
         private final Results results;
+        private final Collection<Class<? extends Throwable>> throwables;
 
         public Single()
         {
-            this(new Results.Synced());
+            this(Throwable.class);
+        }
+
+        @SafeVarargs
+        public Single(Class<? extends Throwable>... throwables) {
+            this(Arrays.asList(throwables));
+        }
+
+        public Single(Collection<Class<? extends Throwable>> throwables) {
+            this(new Results.Synced(), throwables);
         }
 
         public Single(Results results)
         {
+            this(results, Collections.singletonList(Throwable.class));
+        }
+
+        @SafeVarargs
+        public Single(Results results, Class<? extends Throwable>... throwables) {
+            this(results, Arrays.asList(throwables));
+        }
+
+        public Single(Results results, Collection<Class<? extends Throwable>> throwables)
+        {
             this.results = results;
+            this.throwables = throwables;
         }
 
         /**
@@ -251,9 +277,24 @@ public class AsyncFlow
                 }
                 catch (Throwable throwable)
                 {
-                    results.addFailure(throwable);
+                    if (failOnThrowable(throwable))
+                    {
+                        results.addFailure(throwable);
+                    }
+                    throw throwable;
                 }
             };
+        }
+
+        /**
+         * Check if throwable matches any base or derived classes defined by user.
+         * @param throwable Throwable
+         * @return Boolean Boolean
+         */
+        private boolean failOnThrowable(Throwable throwable)
+        {
+            DerivedClass cls = new DerivedClass(throwable.getClass());
+            return throwables.stream().anyMatch(cls::isRelatedTo);
         }
 
         /**
@@ -303,7 +344,10 @@ public class AsyncFlow
                 }
                 catch (Throwable throwable)
                 {
-                    results.addFailure(throwable);
+                    if (failOnThrowable(throwable))
+                    {
+                        results.addFailure(throwable);
+                    }
                     throw throwable;
                 }
             };
@@ -333,7 +377,7 @@ public class AsyncFlow
         /**
          * Waits for a prepared async flow to finishes. It raises AssertionError after timeout expires.
          *
-         * @param timeout Timeout
+         * @param timeout  Timeout
          * @param timeUnit Timeout units
          * @throws InterruptedException If interrupted
          */
@@ -346,7 +390,7 @@ public class AsyncFlow
          * Waits for a prepared async flow to finishes defined number of times. It raises AssertionError after timeout expires.
          *
          * @param timeout Timeout
-         * @param times Number of flow executions to wait
+         * @param times   Number of flow executions to wait
          * @throws InterruptedException If interrupted
          */
         public final void await(long timeout, int times) throws InterruptedException
@@ -357,9 +401,9 @@ public class AsyncFlow
         /**
          * Waits for a prepared async flow to finishes defined number of times. It raises AssertionError after timeout expires.
          *
-         * @param timeout Timeout
+         * @param timeout  Timeout
          * @param timeUnit Timeout units
-         * @param times Number of flow executions to wait
+         * @param times    Number of flow executions to wait
          * @throws InterruptedException If interrupted
          */
         public final void await(long timeout, TimeUnit timeUnit, int times) throws InterruptedException
