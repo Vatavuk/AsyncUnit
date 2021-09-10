@@ -25,38 +25,16 @@ SOFTWARE.
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <parent>
+        <groupId>hr.com.vgv</groupId>
+        <artifactId>parent</artifactId>
+        <version>0.1.6-alpha</version>
+    </parent>
     <groupId>hr.com.vgv.asyncunit</groupId>
     <artifactId>asyncunit</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <name>asyncunit</name>
     <description>Simple tool for testing multi-threaded code</description>
-    <url>https://github.com/Vatavuk/asyncunit</url>
-    <developers>
-        <developer>
-            <name>Vedran Grgo Vatavuk</name>
-            <email>123vgv@gmail.com</email>
-            <organization>Vgv</organization>
-            <organizationUrl>https://github.com/Vatavuk</organizationUrl>
-        </developer>
-    </developers>
-    <distributionManagement>
-        <downloadUrl>https://oss.sonatype.org/content/groups/public</downloadUrl>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
-        <repository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/
-            </url>
-        </repository>
-    </distributionManagement>
-    <scm>
-        <url>https://github.com/Vatavuk/asyncunit</url>
-        <connection>scm:git:https://github.com/Vatavuk/asyncunit.git</connection>
-        <developerConnection>scm:git:https://github.com/Vatavuk/asyncunit.git</developerConnection>
-        <tag>HEAD</tag>
-    </scm>
     <build>
         <pluginManagement>
             <plugins>
@@ -74,55 +52,9 @@ SOFTWARE.
                         <parallel>suites</parallel>
                     </configuration>
                 </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-release-plugin</artifactId>
-                    <version>3.0.0-M1</version>
-                </plugin>
             </plugins>
         </pluginManagement>
     </build>
-    <profiles>
-        <profile>
-            <id>sonatype</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <artifactId>maven-source-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>vgv-sources</id>
-                                <configuration>
-                                    <forceCreation>true</forceCreation>
-                                </configuration>
-                                <goals>
-                                    <goal>jar</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <!--<plugin>-->
-                    <!--&lt;!&ndash;-->
-                    <!--Generate -javadoc.jar artifact, required by Maven Central.-->
-                    <!--&ndash;&gt;-->
-                    <!--<artifactId>maven-javadoc-plugin</artifactId>-->
-                    <!--<executions>-->
-                    <!--<execution>-->
-                    <!--<id>jcabi-javadoc</id>-->
-                    <!--<phase>package</phase>-->
-                    <!--<goals>-->
-                    <!--<goal>jar</goal>-->
-                    <!--</goals>-->
-                    <!--<configuration>-->
-                    <!--<additionalparam>${javadoc.opts}</additionalparam>-->
-                    <!--</configuration>-->
-                    <!--</execution>-->
-                    <!--</executions>-->
-                    <!--</plugin>-->
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
     <dependencies>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
