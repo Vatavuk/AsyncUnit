@@ -7,6 +7,7 @@ Inspiration got from [concurrentunit](https://github.com/jhalterman/concurrentun
 Advantages over concurentunit:
 * simpler usage
 * no restrictions on assertion actions
+* more control over exception propagation
 
 ## Usage
 Wrap asynchronous part of the code using `AsyncFlow.prepare` and use `AsyncFlow.await` to block the main thread.
