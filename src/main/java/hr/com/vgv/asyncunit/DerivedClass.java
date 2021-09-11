@@ -23,7 +23,7 @@ public class DerivedClass
      * @param cls Class
      * @return Boolean Boolean
      */
-    public boolean isRelatedTo(final Class<?> cls) {
+    public final boolean isRelatedTo(final Class<?> cls) {
         final int level;
         if (cls.equals(this.derived)) {
             level = 0;

@@ -85,44 +85,44 @@ public interface Results
         private Semaphore semaphore = new Semaphore(0);
 
         @Override
-        public void addSuccess()
+        public final void addSuccess()
         {
             semaphore.release();
         }
 
         @Override
-        public void addFailure(Throwable throwable)
+        public final void addFailure(Throwable throwable)
         {
             errors.add(throwable);
             semaphore.release();
         }
 
         @Override
-        public void await() throws InterruptedException
+        public final void await() throws InterruptedException
         {
             await(0);
         }
 
         @Override
-        public void await(long period) throws InterruptedException
+        public final void await(long period) throws InterruptedException
         {
             await(period, TimeUnit.MILLISECONDS, 1);
         }
 
         @Override
-        public void await(long period, TimeUnit timeUnit) throws InterruptedException
+        public final void await(long period, TimeUnit timeUnit) throws InterruptedException
         {
             await(period, timeUnit, 1);
         }
 
         @Override
-        public void await(long period, int numOfResults) throws InterruptedException
+        public final void await(long period, int numOfResults) throws InterruptedException
         {
             await(period, TimeUnit.MILLISECONDS, numOfResults);
         }
 
         @Override
-        public void await(long period, TimeUnit timeUnit, int numOfResults) throws InterruptedException
+        public final void await(long period, TimeUnit timeUnit, int numOfResults) throws InterruptedException
         {
             synchronized (this)
             {
