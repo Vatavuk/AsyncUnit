@@ -3,9 +3,8 @@
 # AsyncUnit
 
 [![EO principles respected here](http://www.elegantobjects.org/badge.svg)](http://www.elegantobjects.org)
-![Build Status](https://github.com/Vatavuk/asyncunit/actions/workflows/ci.yml/badge.svg)
 
-[![Build Status](https://travis-ci.org/Vatavuk/asyncunit.svg?branch=master)](https://travis-ci.org/Vatavuk/asyncunit)
+[![Build Status](https://github.com/Vatavuk/asyncunit/actions/workflows/ci.yml/badge.svg)](https://github.com/Vatavuk/asyncunit/actions/workflows/ci.yml/badge.svg)
 [![Test Coverage](https://codecov.io/gh/Vatavuk/asyncunit/branch/master/graph/badge.svg)](https://codecov.io/gh/Vatavuk/asyncunit)
 [![Hits-of-Code](https://hitsofcode.com/github/Vatavuk/asyncunit?branch=main)](https://hitsofcode.com/view/github/Vatavuk/asyncunit?branch=main)
 [![SonarQube](https://img.shields.io/badge/sonar-ok-green.svg)](https://sonarcloud.io/dashboard/index/hr.com.vgv:asyncunit)
