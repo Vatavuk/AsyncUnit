@@ -2,7 +2,8 @@
 
 Simple tool for testing multi-threaded code. It allows you to assert operations in threads. It will wait for threads to finish and will propagate errors to the main thread. 
 
-Inspiration got from [concurrentunit](https://github.com/jhalterman/concurrentunit). 
+Inspiration got from [concurrentunit](https://github.com/jhalterman/concurrentunit).
+
 Advantages over concurentunit:
 * simpler usage
 * no restrictions on assertion actions
