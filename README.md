@@ -1,13 +1,25 @@
+<img src="https://raw.githubusercontent.com/Vatavuk/vgv-parent/master/logo.png" alt="drawing" height="100"/>
+
 # AsyncUnit
+
+[![EO principles respected here](http://www.elegantobjects.org/badge.svg)](http://www.elegantobjects.org)
+![Build Status](https://github.com/Vatavuk/asyncunit/actions/workflows/ci.yml/badge.svg)
+
+[![Build Status](https://travis-ci.org/Vatavuk/asyncunit.svg?branch=master)](https://travis-ci.org/Vatavuk/asyncunit)
+[![Test Coverage](https://codecov.io/gh/Vatavuk/asyncunit/branch/master/graph/badge.svg)](https://codecov.io/gh/Vatavuk/asyncunit)
+[![Hits-of-Code](https://hitsofcode.com/github/Vatavuk/asyncunit?branch=main)](https://hitsofcode.com/view/github/Vatavuk/asyncunit?branch=main)
+[![SonarQube](https://img.shields.io/badge/sonar-ok-green.svg)](https://sonarcloud.io/dashboard/index/hr.com.vgv:asyncunit)
+
+[![Javadocs](http://javadoc.io/badge/hr.com.vgv/asyncunit.svg)](http://javadoc.io/doc/hr.com.vgv/asyncunit)
+[![Maven Central](https://img.shields.io/maven-central/v/hr.com.vgv/asyncunit.svg)](https://maven-badges.herokuapp.com/maven-central/hr.com.vgv/asyncunit)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
 Simple tool for testing multi-threaded code. It allows you to assert operations in threads. It will wait for threads to finish and will propagate errors to the main thread. 
 
-Inspiration got from [concurrentunit](https://github.com/jhalterman/concurrentunit).
-
+Inspiration got from [concurrentunit](https://github.com/jhalterman/concurrentunit). 
 Advantages over concurentunit:
 * simpler usage
 * no restrictions on assertion actions
-* more control over exception propagation
 
 ## Usage
 Wrap asynchronous part of the code using `AsyncFlow.prepare` and use `AsyncFlow.await` to block the main thread.
