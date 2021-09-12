@@ -2,8 +2,7 @@
 
 # AsyncUnit
 
-[![Build Status](https://github.com/Vatavuk/asyncunit/actions/workflows/ci.yml/badge.svg)](https://github.com/Vatavuk/asyncunit/actions/workflows/ci.yml/badge.svg)
-[![Test Coverage](https://codecov.io/gh/Vatavuk/asyncunit/branch/master/graph/badge.svg)](https://codecov.io/gh/Vatavuk/asyncunit)
+[![Build Status](https://github.com/Vatavuk/asyncunit/actions/workflows/build.yml/badge.svg)](https://github.com/Vatavuk/asyncunit/actions/workflows/build.yml/badge.svg)
 [![Hits-of-Code](https://hitsofcode.com/github/Vatavuk/asyncunit?branch=main)](https://hitsofcode.com/view/github/Vatavuk/asyncunit?branch=main)
 [![SonarQube](https://img.shields.io/badge/sonar-ok-green.svg)](https://sonarcloud.io/dashboard/index/hr.com.vgv:asyncunit)
 
@@ -74,5 +73,19 @@ public void supportsLazyFlowPreparation() throws Exception {
     flow.await();
 }
 ```
+By default, the tool propagates every `Throwable` back to the main class. You can customize this behaviour by specifying
+which exception to propagate.
+```java
+@Test
+public void supportsCustomExceptionPropagation() {
 
+    AsyncFlow.Single flow = new AsyncFlow.Single(IOException.class);
+
+    new Thread(flow.prepare((Runnable) () -> {
+        throw new RuntimeException("");
+    })).start();
+
+    assertThrows(AssertionError.class, () -> flow.await(100));
+}
+ ```
 
