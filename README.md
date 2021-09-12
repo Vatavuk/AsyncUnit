@@ -13,13 +13,15 @@
 Simple tool for testing multi-threaded code. It allows you to assert operations in threads. It will wait for threads to finish and will propagate errors to the main thread. 
 
 Inspiration got from [concurrentunit](https://github.com/jhalterman/concurrentunit). 
+
 Advantages over concurentunit:
 * simpler usage
 * no restrictions on assertion actions
+* more control over exception propagation
 
 ## Usage
 Wrap asynchronous part of the code using `AsyncFlow.prepare` and use `AsyncFlow.await` to block the main thread.
-If asynchronous part fails with exception, the test will also fail. 
+If asynchronous part fails exceptionally, the test will also fail. 
 
 ```java
 @Test
@@ -73,19 +75,22 @@ public void supportsLazyFlowPreparation() throws Exception {
     flow.await();
 }
 ```
-By default, the tool propagates every `Throwable` back to the main class. You can customize this behaviour by specifying
-which exception to propagate.
+By default, tool propagates every `Throwable` from an async flow back to the main thread. You can customize this by specifying
+which exceptions you want to propagate. For example:
 ```java
-@Test
-public void supportsCustomExceptionPropagation() {
 
-    AsyncFlow.Single flow = new AsyncFlow.Single(IOException.class);
+new AsyncFlow.Single(
+    IllegalStateException.class,
+    IOException.class,
+    CustomException.class    
+);
 
-    new Thread(flow.prepare((Runnable) () -> {
-        throw new RuntimeException("");
-    })).start();
-
-    assertThrows(AssertionError.class, () -> flow.await(100));
-}
  ```
 
+## Contribution
+You can contribute by forking the repo and sending a pull request.
+Make sure your branch builds without any warnings/issues:
+
+```
+mvn clean install
+```
