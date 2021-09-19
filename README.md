@@ -10,7 +10,7 @@
 [![Maven Central](https://img.shields.io/maven-central/v/hr.com.vgv/asyncunit.svg)](https://maven-badges.herokuapp.com/maven-central/hr.com.vgv/asyncunit)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
-Simple tool for testing multi-threaded code. It allows you to assert operations in threads. It will wait for threads to finish and will propagate errors to the main thread. 
+Simple tool for testing asynchronous code. It allows you to assert operations in threads. It will wait for threads to finish and will propagate errors to the main thread. 
 
 Inspiration got from [concurrentunit](https://github.com/jhalterman/concurrentunit). 
 
